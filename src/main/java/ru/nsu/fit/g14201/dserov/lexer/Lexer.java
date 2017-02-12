@@ -15,17 +15,15 @@ public class Lexer {
 
     public Lexer(Reader reader) {
         this.reader = reader;
-        buffer = -2;
+        buffer = ' ';
     }
 
     public Lexeme getLexeme() throws LexerException {
         try {
             int ch = buffer;
-            buffer = -2;
-            if (ch == -2) {
-                do {
-                    ch = reader.read();
-                } while (ch == ' ' || ch == '\t' || ch == '\n');
+            buffer = ' ';
+            while (ch == ' ' || ch == '\t' || ch == '\n') {
+                ch = reader.read();
             }
 
             if (ch == -1) {
@@ -37,7 +35,7 @@ public class Lexer {
                 while (true) {
                     int nextCh = reader.read();
                     buffer = nextCh;
-                    if (Character.isDigit(ch)) {
+                    if (Character.isDigit(nextCh)) {
                         resultSb.append((char) nextCh);
                     } else {
                         return new Lexeme(LexemeType.NUMBER, resultSb.toString());
