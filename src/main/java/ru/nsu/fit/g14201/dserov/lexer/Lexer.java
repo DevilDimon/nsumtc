@@ -11,37 +11,59 @@ import java.io.Reader;
 public class Lexer {
     private Reader reader;
 
+    private int buffer;
+
     public Lexer(Reader reader) {
         this.reader = reader;
+        buffer = ' ';
     }
 
-    public Lexeme getLexeme() {
+    public Lexeme getLexeme() throws LexerException {
         try {
-            int ch = -1;
-            do {
+            int ch = buffer;
+            buffer = ' ';
+            while (ch == ' ' || ch == '\t' || ch == '\n') {
                 ch = reader.read();
-            } while (ch == ' ' || ch == '\t' || ch == '\n');
-
-            if (ch == -1) {
-                return new Lexeme(LexemeType.EOF, null);
             }
 
-            switch (ch) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    
+            if (ch == -1) {
+                return new Lexeme(LexemeType.EOF);
+            }
+
+            if (Character.isDigit(ch)) {
+                StringBuilder resultSb = new StringBuilder((char) ch + "");
+                while (true) {
+                    int nextCh = reader.read();
+                    buffer = nextCh;
+                    if (Character.isDigit(nextCh)) {
+                        resultSb.append((char) nextCh);
+                    } else {
+                        return new Lexeme(LexemeType.NUMBER, resultSb.toString());
+                    }
+                }
+            } else {
+                switch (ch) {
+                    case '+':
+                        return new Lexeme(LexemeType.PLUS);
+                    case '-':
+                        return new Lexeme(LexemeType.MINUS);
+                    case '*':
+                        return new Lexeme(LexemeType.MULTIPLY);
+                    case '/':
+                        return new Lexeme(LexemeType.DIVIDE);
+                    case '(':
+                        return new Lexeme(LexemeType.LEFT_BRACKET);
+                    case ')':
+                        return new Lexeme(LexemeType.RIGHT_BRACKET);
+                    case '^':
+                        return new Lexeme(LexemeType.POWER);
+                    default:
+                        throw new LexerException();
+                }
             }
 
         } catch (IOException e) {
-            return new Lexeme(LexemeType.EOF, null);
+            return new Lexeme(LexemeType.EOF);
         }
     }
 }
